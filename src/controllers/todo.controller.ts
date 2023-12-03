@@ -1,6 +1,4 @@
 import { RequestHandler } from "express";
-import userModel from "../models/user.model";
-import bcrypt from "bcryptjs";
 import todoModel from "../models/todo.model";
 
 export const getAllTodos: RequestHandler = async (req, res, next) => {
@@ -15,7 +13,12 @@ export const getAllTodos: RequestHandler = async (req, res, next) => {
       .find({ userId, title: { $regex: search } })
       .skip(skip)
       .limit(limit);
-    res.status(200).json({ success: true, message: "Todo fetched", todos });
+    const total = await todoModel
+      .find({ userId, title: { $regex: search } })
+      .countDocuments();
+    res
+      .status(200)
+      .json({ success: true, message: "Todo fetched", todos, total });
   } catch (error) {
     next(error);
   }
